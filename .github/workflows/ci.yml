@@ -67,4 +67,4 @@ jobs:
         run: chmod +x hexlet-path-size
 
       - name: Run application
-        run: ./hexlet-path-size
+        run: ./hexlet-path-size Makefile
