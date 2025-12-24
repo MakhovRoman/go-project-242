@@ -9,6 +9,3 @@ run: #можно добавить через build:fmt предваритель�
 build: #можно добавить через build:fmt предварительный линтинг
 	mkdir -p bin
 	go build -o bin/hexlet-path-size ./cmd/hexlet-path-size
-
-start:
-	bin/hexlet-path-size
