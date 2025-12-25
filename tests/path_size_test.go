@@ -1,7 +1,9 @@
-package code
+package tests
 
 import (
+	"code"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -12,7 +14,17 @@ type testCase struct {
 	wantErr bool
 }
 
-const baseRoute = "./testdata/"
+func getTestDataPath(file string) string {
+	_, currentFile, _, ok := runtime.Caller(0)
+
+	if !ok {
+		panic("can't get current file path")
+	}
+
+	projectRoot := filepath.Dir(filepath.Dir(currentFile))
+
+	return filepath.Join(projectRoot, "testdata", file)
+}
 
 func TestGetSize(t *testing.T) {
 	tests := []testCase{
@@ -41,8 +53,8 @@ func TestGetSize(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			path := filepath.Join(baseRoute, tc.path)
-			got, err := GetSize(path)
+			path := getTestDataPath(tc.path)
+			got, err := code.GetSize(path)
 
 			if tc.wantErr {
 				if err == nil {
