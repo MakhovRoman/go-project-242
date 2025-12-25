@@ -27,9 +27,25 @@ jobs:
         with:
           version: v2.6
 
-  build:
+  test:
     runs-on: ubuntu-latest
     needs: lint
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Setup golang
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        run: make test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6

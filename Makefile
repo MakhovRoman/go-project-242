@@ -1,11 +1,21 @@
+CMD_DIR = ./cmd/hexlet-path-size
+BINARY_NAME = hexlet-path-size
+
+.PHONY: lint test build run full-flow
+
 .DEFAULT_GOAL := build
 
 lint:
 	golangci-lint run
 
-run: #можно добавить через build:fmt предварительный линтинг
-	go run cmd/hexlet-path-size/main.go
+test:
+	go test ./...
 
-build: #можно добавить через build:fmt предварительный линтинг
+build:
 	mkdir -p bin
-	go build -o bin/hexlet-path-size ./cmd/hexlet-path-size
+	go build -o bin/${BINARY_NAME} ${CMD_DIR}
+
+full-flow: lint test build
+
+run:
+	go run ${CMD_DIR}/main.go

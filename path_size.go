@@ -1,4 +1,4 @@
-package pathsize
+package code
 
 import (
 	"fmt"
@@ -26,8 +26,8 @@ func GetSize(path string) (int64, error) {
 
 	for _, file := range fileList {
 		info, e := file.Info()
-
-		if e != nil || info.IsDir() {
+		//macOS добавляет .DS_Store
+		if e != nil || info.IsDir() || info.Name() == ".DS_Store" {
 			continue
 		}
 
