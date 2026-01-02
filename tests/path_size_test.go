@@ -7,11 +7,23 @@ import (
 	"testing"
 )
 
-type testCase struct {
+type testGetSizeCase struct {
 	name    string
 	path    string
 	want    int64
 	wantErr bool
+}
+
+type testFormatSizeCase struct {
+	name string
+	size int64
+	want string
+}
+
+type testBuildSizeCase struct {
+	name     string
+	humanize bool
+	want     string
 }
 
 func getTestDataPath(file string) string {
@@ -27,7 +39,7 @@ func getTestDataPath(file string) string {
 }
 
 func TestGetSize(t *testing.T) {
-	tests := []testCase{
+	tests := []testGetSizeCase{
 		{
 			name: "empty directory",
 			path: "empty_directory",
@@ -70,6 +82,50 @@ func TestGetSize(t *testing.T) {
 
 			if got != tc.want {
 				t.Errorf("got %d, want %d", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestFormatSize(t *testing.T) {
+	tests := []testFormatSizeCase{
+		{name: "Bytes", size: 1, want: "1.0B"},
+		{name: "KyloBytes", size: code.KB, want: "1.0KB"},
+		{name: "MegaBytes", size: code.MB, want: "1.0MB"},
+		{name: "GigaBytes", size: code.GB, want: "1.0GB"},
+		{name: "TeraBytes", size: code.TB, want: "1.0TB"},
+		{name: "PetaBytes", size: code.PB, want: "1.0PB"},
+		{name: "ExaBytes", size: code.EB, want: "1.0EB"},
+	}
+
+	for _, test := range tests {
+		tc := test
+
+		t.Run(tc.name, func(t *testing.T) {
+			got := code.FormatSize(tc.size)
+			if tc.want != got {
+				t.Errorf("got %s, want %s", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestBuildSize(t *testing.T) {
+	var testSize int64 = 1_000_000
+	testPath := "test"
+	testHumanize := []testBuildSizeCase{
+		{name: "humanize", humanize: true, want: "1.0MB\ttest\n"},
+		{name: "not humanize", humanize: false, want: "1000000B\ttest\n"},
+	}
+
+	for _, test := range testHumanize {
+		tc := test
+
+		t.Run(tc.name, func(t *testing.T) {
+			got := code.BuildOutput(testSize, testPath, tc.humanize)
+
+			if got != tc.want {
+				t.Errorf("got %s, want %s", got, tc.want)
 			}
 		})
 	}

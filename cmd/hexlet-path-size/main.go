@@ -11,9 +11,19 @@ import (
 )
 
 func main() {
+	var humanize bool
+
 	cmd := &cli.Command{
 		Name:  "hexlet-path-size",
 		Usage: "print size of a file or directory",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:        "human",
+				Aliases:     []string{"H"},
+				Usage:       "Add size output in human-readable format",
+				Destination: &humanize,
+			},
+		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			path := cmd.Args().First()
 
@@ -27,7 +37,7 @@ func main() {
 				return err
 			}
 
-			pathsize.PrintSize(size, path)
+			pathsize.PrintSize(size, path, humanize)
 
 			return nil
 		},
