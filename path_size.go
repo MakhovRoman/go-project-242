@@ -3,6 +3,8 @@ package code
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 const (
@@ -14,7 +16,11 @@ const (
 	EB = PB * 1000
 )
 
-func GetSize(path string) (int64, error) {
+func GetSize(path string, includeHidden bool) (int64, error) {
+	if !includeHidden && hasHiddenSegment(path) {
+		return 0, nil
+	}
+
 	info, err := os.Lstat(path)
 
 	if err != nil {
@@ -34,16 +40,37 @@ func GetSize(path string) (int64, error) {
 	}
 
 	for _, file := range fileList {
-		info, e := file.Info()
-		//macOS добавляет .DS_Store
-		if e != nil || info.IsDir() || info.Name() == ".DS_Store" {
+		entry, e := file.Info()
+
+		if e != nil {
 			continue
 		}
 
-		total += info.Size()
+		if !includeHidden && strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+
+		if entry.IsDir() {
+			continue
+		}
+
+		total += entry.Size()
 	}
 
 	return total, nil
+}
+
+func hasHiddenSegment(path string) bool {
+	clean := filepath.Clean(path)
+	parts := strings.Split(clean, string(os.PathSeparator))
+
+	for _, p := range parts {
+		if strings.HasPrefix(p, ".") && p != "." && p != ".." {
+			return true
+		}
+	}
+
+	return false
 }
 
 func DefaultFormat(size int64) string {

@@ -8,10 +8,11 @@ import (
 )
 
 type testGetSizeCase struct {
-	name    string
-	path    string
-	want    int64
-	wantErr bool
+	name          string
+	path          string
+	includeHidden bool
+	want          int64
+	wantErr       bool
 }
 
 type testFormatSizeCase struct {
@@ -41,24 +42,52 @@ func getTestDataPath(file string) string {
 func TestGetSize(t *testing.T) {
 	tests := []testGetSizeCase{
 		{
-			name: "empty directory",
-			path: "empty_directory",
-			want: 0,
+			name:          "empty directory",
+			path:          "empty_directory",
+			includeHidden: false,
+			want:          0,
 		},
 		{
-			name: "file",
-			path: "test.json",
-			want: 68,
+			name:          "file",
+			path:          "test.json",
+			includeHidden: false,
+			want:          68,
 		},
 		{
-			name: "directory with nested folders",
-			path: "amazing_directory",
-			want: 68,
+			name:          "directory with nested folders",
+			path:          "amazing_directory",
+			includeHidden: false,
+			want:          68,
 		},
 		{
-			name:    "non-existent path",
-			path:    "does_not_exist",
-			wantErr: true,
+			name:          "non-existent path",
+			path:          "does_not_exist",
+			includeHidden: false,
+			wantErr:       true,
+		},
+		{
+			name:          "check hidden files",
+			path:          "empty_directory",
+			includeHidden: true,
+			want:          18,
+		},
+		{
+			name:          "does not calculate hidden file",
+			path:          "empty_directory/.hidden_json",
+			includeHidden: false,
+			want:          0,
+		},
+		{
+			name:          "file in hidden dir",
+			path:          ".hidden_dir/test.json",
+			includeHidden: true,
+			want:          72,
+		},
+		{
+			name:          "does not calculate file in hidden dir",
+			path:          ".hidden_dir/test.json",
+			includeHidden: false,
+			want:          0,
 		},
 	}
 
@@ -66,7 +95,7 @@ func TestGetSize(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			path := getTestDataPath(tc.path)
-			got, err := code.GetSize(path)
+			got, err := code.GetSize(path, tc.includeHidden)
 
 			if tc.wantErr {
 				if err == nil {

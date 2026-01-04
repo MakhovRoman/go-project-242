@@ -12,6 +12,7 @@ import (
 
 func main() {
 	var humanize bool
+	var includeHidden bool
 
 	cmd := &cli.Command{
 		Name:  "hexlet-path-size",
@@ -23,6 +24,12 @@ func main() {
 				Usage:       "Add size output in human-readable format",
 				Destination: &humanize,
 			},
+			&cli.BoolFlag{
+				Name:        "all",
+				Aliases:     []string{"a"},
+				Usage:       "include hidden files and directories",
+				Destination: &includeHidden,
+			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			path := cmd.Args().First()
@@ -31,7 +38,7 @@ func main() {
 				return fmt.Errorf("path argument is required")
 			}
 
-			size, err := pathsize.GetSize(path)
+			size, err := pathsize.GetSize(path, includeHidden)
 
 			if err != nil {
 				return err
