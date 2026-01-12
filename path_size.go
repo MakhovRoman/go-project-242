@@ -8,12 +8,13 @@ import (
 )
 
 const (
-	KB = int64(1000)
-	MB = KB * 1000
-	GB = MB * 1000
-	TB = GB * 1000
-	PB = TB * 1000
-	EB = PB * 1000
+	byteCoef = 1024
+	KB       = int64(byteCoef)
+	MB       = KB * byteCoef
+	GB       = MB * byteCoef
+	TB       = GB * byteCoef
+	PB       = TB * byteCoef
+	EB       = PB * byteCoef
 )
 
 func GetPathSize(path string, includeHidden bool, recursive bool, human bool) (string, error) {
@@ -43,19 +44,13 @@ func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 
 	var total int64
 
-	fileList, err := os.ReadDir(path)
+	entries, err := os.ReadDir(path)
 
 	if err != nil {
 		return 0, err
 	}
 
-	for _, file := range fileList {
-		entry, e := file.Info()
-
-		if e != nil {
-			continue
-		}
-
+	for _, entry := range entries {
 		if !includeHidden && strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
@@ -77,7 +72,13 @@ func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 			continue
 		}
 
-		total += entry.Size()
+		info, e := entry.Info()
+
+		if e != nil {
+			continue
+		}
+
+		total += info.Size()
 	}
 
 	return total, nil

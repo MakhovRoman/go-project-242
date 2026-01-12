@@ -137,7 +137,7 @@ func TestFormatSize(t *testing.T) {
 
 func TestBuildOutput(t *testing.T) {
 	tests := []testBuildSizeCase{
-		{name: "humanize", humanize: true, want: "1.0MB"},
+		{name: "humanize", humanize: true, want: "976.6KB"},
 		{name: "not humanize", humanize: false, want: "1000000B"},
 	}
 
