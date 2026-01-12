@@ -11,6 +11,7 @@ type testGetSizeCase struct {
 	name          string
 	path          string
 	includeHidden bool
+	recursive     bool
 	want          int64
 	wantErr       bool
 }
@@ -42,28 +43,24 @@ func getTestDataPath(file string) string {
 func TestGetSize(t *testing.T) {
 	tests := []testGetSizeCase{
 		{
-			name:          "empty directory",
-			path:          "empty_directory",
-			includeHidden: false,
-			want:          0,
+			name: "empty directory",
+			path: "empty_directory",
+			want: 0,
 		},
 		{
-			name:          "file",
-			path:          "test.json",
-			includeHidden: false,
-			want:          68,
+			name: "file",
+			path: "test.json",
+			want: 68,
 		},
 		{
-			name:          "directory with nested folders",
-			path:          "amazing_directory",
-			includeHidden: false,
-			want:          68,
+			name: "directory with nested folders",
+			path: "amazing_directory",
+			want: 68,
 		},
 		{
-			name:          "non-existent path",
-			path:          "does_not_exist",
-			includeHidden: false,
-			wantErr:       true,
+			name:    "non-existent path",
+			path:    "does_not_exist",
+			wantErr: true,
 		},
 		{
 			name:          "check hidden files",
@@ -72,10 +69,9 @@ func TestGetSize(t *testing.T) {
 			want:          18,
 		},
 		{
-			name:          "does not calculate hidden file",
-			path:          "empty_directory/.hidden_json",
-			includeHidden: false,
-			want:          0,
+			name: "does not calculate hidden file",
+			path: "empty_directory/.hidden_json",
+			want: 0,
 		},
 		{
 			name:          "file in hidden dir",
@@ -84,18 +80,28 @@ func TestGetSize(t *testing.T) {
 			want:          72,
 		},
 		{
-			name:          "does not calculate file in hidden dir",
-			path:          ".hidden_dir/test.json",
-			includeHidden: false,
-			want:          0,
+			name: "does not calculate file in hidden dir",
+			path: ".hidden_dir/test.json",
+			want: 0,
+		},
+		{
+			name:      "recursive",
+			path:      "recursive_dir",
+			recursive: true,
+			want:      102,
+		},
+		{
+			name: "does not calculate recursive dir",
+			path: "recursive_dir",
+			want: 0,
 		},
 	}
 
-	for _, tc := range tests {
-		tc := tc
+	for _, test := range tests {
+		tc := test
 		t.Run(tc.name, func(t *testing.T) {
 			path := getTestDataPath(tc.path)
-			got, err := code.GetSize(path, tc.includeHidden)
+			got, err := code.GetSize(path, tc.includeHidden, tc.recursive)
 
 			if tc.wantErr {
 				if err == nil {
