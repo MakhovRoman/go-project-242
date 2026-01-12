@@ -1,9 +1,7 @@
-package tests
+package code
 
 import (
-	"code"
 	"path/filepath"
-	"runtime"
 	"testing"
 )
 
@@ -29,15 +27,7 @@ type testBuildSizeCase struct {
 }
 
 func getTestDataPath(file string) string {
-	_, currentFile, _, ok := runtime.Caller(0)
-
-	if !ok {
-		panic("can't get current file path")
-	}
-
-	projectRoot := filepath.Dir(filepath.Dir(currentFile))
-
-	return filepath.Join(projectRoot, "testdata", file)
+	return filepath.Join("testdata", file)
 }
 
 func TestGetSize(t *testing.T) {
@@ -101,7 +91,7 @@ func TestGetSize(t *testing.T) {
 		tc := test
 		t.Run(tc.name, func(t *testing.T) {
 			path := getTestDataPath(tc.path)
-			got, err := code.GetSize(path, tc.includeHidden, tc.recursive)
+			got, err := GetSize(path, tc.includeHidden, tc.recursive)
 
 			if tc.wantErr {
 				if err == nil {
@@ -125,19 +115,19 @@ func TestGetSize(t *testing.T) {
 func TestFormatSize(t *testing.T) {
 	tests := []testFormatSizeCase{
 		{name: "Bytes", size: 1, want: "1.0B"},
-		{name: "KyloBytes", size: code.KB, want: "1.0KB"},
-		{name: "MegaBytes", size: code.MB, want: "1.0MB"},
-		{name: "GigaBytes", size: code.GB, want: "1.0GB"},
-		{name: "TeraBytes", size: code.TB, want: "1.0TB"},
-		{name: "PetaBytes", size: code.PB, want: "1.0PB"},
-		{name: "ExaBytes", size: code.EB, want: "1.0EB"},
+		{name: "KyloBytes", size: KB, want: "1.0KB"},
+		{name: "MegaBytes", size: MB, want: "1.0MB"},
+		{name: "GigaBytes", size: GB, want: "1.0GB"},
+		{name: "TeraBytes", size: TB, want: "1.0TB"},
+		{name: "PetaBytes", size: PB, want: "1.0PB"},
+		{name: "ExaBytes", size: EB, want: "1.0EB"},
 	}
 
 	for _, test := range tests {
 		tc := test
 
 		t.Run(tc.name, func(t *testing.T) {
-			got := code.FormatSize(tc.size)
+			got := FormatSize(tc.size)
 			if tc.want != got {
 				t.Errorf("got %s, want %s", got, tc.want)
 			}
@@ -157,7 +147,7 @@ func TestBuildSize(t *testing.T) {
 		tc := test
 
 		t.Run(tc.name, func(t *testing.T) {
-			got := code.BuildOutput(testSize, testPath, tc.humanize)
+			got := BuildOutput(testSize, testPath, tc.humanize)
 
 			if got != tc.want {
 				t.Errorf("got %s, want %s", got, tc.want)

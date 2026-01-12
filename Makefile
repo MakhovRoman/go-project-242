@@ -9,7 +9,7 @@ lint:
 	golangci-lint run
 
 test:
-	go test -v ./tests
+	go test -v .
 
 build:
 	mkdir -p bin
