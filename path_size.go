@@ -7,16 +7,6 @@ import (
 	"strings"
 )
 
-const (
-	byteCoef = 1024
-	KB       = int64(byteCoef)
-	MB       = KB * byteCoef
-	GB       = MB * byteCoef
-	TB       = GB * byteCoef
-	PB       = TB * byteCoef
-	EB       = PB * byteCoef
-)
-
 func GetPathSize(path string, includeHidden bool, recursive bool, human bool) (string, error) {
 	s, err := getSize(path, includeHidden, recursive)
 
@@ -24,7 +14,7 @@ func GetPathSize(path string, includeHidden bool, recursive bool, human bool) (s
 		return "", err
 	}
 
-	return BuildOutput(s, path, human), nil
+	return BuildOutput(s, human), nil
 }
 
 func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
@@ -33,9 +23,17 @@ func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 	}
 
 	info, err := os.Lstat(path)
-
 	if err != nil {
 		return 0, err
+	}
+
+	if info.Mode()&os.ModeSymlink != 0 {
+		target, err := filepath.EvalSymlinks(path)
+		if err != nil {
+			return 0, err
+		}
+
+		return getSize(target, includeHidden, recursive)
 	}
 
 	if !info.IsDir() {
@@ -45,7 +43,6 @@ func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 	var total int64
 
 	entries, err := os.ReadDir(path)
-
 	if err != nil {
 		return 0, err
 	}
@@ -55,15 +52,28 @@ func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 			continue
 		}
 
+		p := filepath.Join(path, entry.Name())
+		entryInfo, e := entry.Info()
+
+		if e != nil {
+			continue
+		}
+
+		if entryInfo.Mode()&os.ModeSymlink != 0 {
+			s, er := getSize(p, includeHidden, recursive)
+			if er != nil {
+				return 0, er
+			}
+			total += s
+			continue
+		}
+
 		if entry.IsDir() {
 			if !recursive {
 				continue
 			}
 
-			p := filepath.Join(path, entry.Name())
-
 			s, er := getSize(p, includeHidden, recursive)
-
 			if er != nil {
 				return 0, er
 			}
@@ -72,13 +82,7 @@ func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 			continue
 		}
 
-		info, e := entry.Info()
-
-		if e != nil {
-			continue
-		}
-
-		total += info.Size()
+		total += entryInfo.Size()
 	}
 
 	return total, nil
@@ -102,36 +106,23 @@ func DefaultFormat(size int64) string {
 }
 
 func FormatSize(size int64) string {
-	var result float64
-	unit := "B"
+	val := float64(size)
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
+	i := 0
 
-	switch {
-	case size >= EB:
-		result = float64(size) / float64(EB)
-		unit = "EB"
-	case size >= PB:
-		result = float64(size) / float64(PB)
-		unit = "PB"
-	case size >= TB:
-		result = float64(size) / float64(TB)
-		unit = "TB"
-	case size >= GB:
-		result = float64(size) / float64(GB)
-		unit = "GB"
-	case size >= MB:
-		result = float64(size) / float64(MB)
-		unit = "MB"
-	case size >= KB:
-		result = float64(size) / float64(KB)
-		unit = "KB"
-	default:
-		result = float64(size)
+	for val >= 1024 && i < len(units)-1 {
+		val /= 1024
+		i++
 	}
 
-	return fmt.Sprintf("%.1f%s", result, unit)
+	if i == 0 {
+		return fmt.Sprintf("%dB", size)
+	}
+
+	return fmt.Sprintf("%.1f%s", val, units[i])
 }
 
-func BuildOutput(size int64, path string, human bool) string {
+func BuildOutput(size int64, human bool) string {
 	if human {
 		return FormatSize(size)
 	}
@@ -140,5 +131,5 @@ func BuildOutput(size int64, path string, human bool) string {
 }
 
 func PrintSize(size string, path string) {
-	fmt.Printf("%s\t%s", size, path)
+	fmt.Printf("%s\t%s\n", size, path)
 }
