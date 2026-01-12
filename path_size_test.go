@@ -30,7 +30,7 @@ func getTestDataPath(file string) string {
 	return filepath.Join("testdata", file)
 }
 
-func TestGetSize(t *testing.T) {
+func TestGetPathSize(t *testing.T) {
 	tests := []testGetSizeCase{
 		{
 			name: "empty directory",
@@ -91,7 +91,7 @@ func TestGetSize(t *testing.T) {
 		tc := test
 		t.Run(tc.name, func(t *testing.T) {
 			path := getTestDataPath(tc.path)
-			got, err := GetSize(path, tc.includeHidden, tc.recursive)
+			got, err := GetPathSize(path, tc.includeHidden, tc.recursive)
 
 			if tc.wantErr {
 				if err == nil {

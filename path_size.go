@@ -16,7 +16,7 @@ const (
 	EB = PB * 1000
 )
 
-func GetSize(path string, includeHidden bool, recursive bool) (int64, error) {
+func GetPathSize(path string, includeHidden bool, recursive bool) (int64, error) {
 	if !includeHidden && hasHiddenSegment(path) {
 		return 0, nil
 	}
@@ -57,7 +57,7 @@ func GetSize(path string, includeHidden bool, recursive bool) (int64, error) {
 
 			p := filepath.Join(path, entry.Name())
 
-			s, er := GetSize(p, includeHidden, recursive)
+			s, er := GetPathSize(p, includeHidden, recursive)
 
 			if er != nil {
 				return 0, er

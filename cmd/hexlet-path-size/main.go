@@ -45,7 +45,7 @@ func main() {
 				return fmt.Errorf("path argument is required")
 			}
 
-			size, err := pathsize.GetSize(path, includeHidden, recursive)
+			size, err := pathsize.GetPathSize(path, includeHidden, recursive)
 
 			if err != nil {
 				return err
