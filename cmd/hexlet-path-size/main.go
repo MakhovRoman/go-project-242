@@ -45,13 +45,13 @@ func main() {
 				return fmt.Errorf("path argument is required")
 			}
 
-			size, err := pathsize.GetPathSize(path, includeHidden, recursive)
+			size, err := pathsize.GetPathSize(path, includeHidden, recursive, humanize)
 
 			if err != nil {
 				return err
 			}
 
-			pathsize.PrintSize(size, path, humanize)
+			pathsize.PrintSize(size, path)
 
 			return nil
 		},

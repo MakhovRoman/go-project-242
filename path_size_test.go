@@ -10,7 +10,8 @@ type testGetSizeCase struct {
 	path          string
 	includeHidden bool
 	recursive     bool
-	want          int64
+	humanize      bool
+	want          string
 	wantErr       bool
 }
 
@@ -35,17 +36,17 @@ func TestGetPathSize(t *testing.T) {
 		{
 			name: "empty directory",
 			path: "empty_directory",
-			want: 0,
+			want: "0B",
 		},
 		{
 			name: "file",
 			path: "test.json",
-			want: 68,
+			want: "68B",
 		},
 		{
 			name: "directory with nested folders",
 			path: "amazing_directory",
-			want: 68,
+			want: "68B",
 		},
 		{
 			name:    "non-existent path",
@@ -56,48 +57,47 @@ func TestGetPathSize(t *testing.T) {
 			name:          "check hidden files",
 			path:          "empty_directory",
 			includeHidden: true,
-			want:          18,
+			want:          "18B",
 		},
 		{
 			name: "does not calculate hidden file",
 			path: "empty_directory/.hidden_json",
-			want: 0,
+			want: "0B",
 		},
 		{
 			name:          "file in hidden dir",
 			path:          ".hidden_dir/test.json",
 			includeHidden: true,
-			want:          72,
+			want:          "72B",
 		},
 		{
 			name: "does not calculate file in hidden dir",
 			path: ".hidden_dir/test.json",
-			want: 0,
+			want: "0B",
 		},
 		{
 			name:      "recursive",
 			path:      "recursive_dir",
 			recursive: true,
-			want:      102,
+			want:      "102B",
 		},
 		{
 			name: "does not calculate recursive dir",
 			path: "recursive_dir",
-			want: 0,
+			want: "0B",
 		},
 	}
 
-	for _, test := range tests {
-		tc := test
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			path := getTestDataPath(tc.path)
-			got, err := GetPathSize(path, tc.includeHidden, tc.recursive)
+
+			got, err := GetPathSize(path, tc.includeHidden, tc.recursive, tc.humanize)
 
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got nil")
 				}
-
 				return
 			}
 
@@ -106,7 +106,7 @@ func TestGetPathSize(t *testing.T) {
 			}
 
 			if got != tc.want {
-				t.Errorf("got %d, want %d", got, tc.want)
+				t.Errorf("got %q, want %q", got, tc.want)
 			}
 		})
 	}
@@ -135,22 +135,18 @@ func TestFormatSize(t *testing.T) {
 	}
 }
 
-func TestBuildSize(t *testing.T) {
-	var testSize int64 = 1_000_000
-	testPath := "test"
-	testHumanize := []testBuildSizeCase{
-		{name: "humanize", humanize: true, want: "1.0MB\ttest\n"},
-		{name: "not humanize", humanize: false, want: "1000000B\ttest\n"},
+func TestBuildOutput(t *testing.T) {
+	tests := []testBuildSizeCase{
+		{name: "humanize", humanize: true, want: "1.0MB"},
+		{name: "not humanize", humanize: false, want: "1000000B"},
 	}
 
-	for _, test := range testHumanize {
-		tc := test
-
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BuildOutput(testSize, testPath, tc.humanize)
+			got := BuildOutput(1_000_000, "test", tc.humanize)
 
 			if got != tc.want {
-				t.Errorf("got %s, want %s", got, tc.want)
+				t.Errorf("got %q, want %q", got, tc.want)
 			}
 		})
 	}

@@ -16,7 +16,17 @@ const (
 	EB = PB * 1000
 )
 
-func GetPathSize(path string, includeHidden bool, recursive bool) (int64, error) {
+func GetPathSize(path string, includeHidden bool, recursive bool, human bool) (string, error) {
+	s, err := getSize(path, includeHidden, recursive)
+
+	if err != nil {
+		return "", err
+	}
+
+	return BuildOutput(s, path, human), nil
+}
+
+func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 	if !includeHidden && hasHiddenSegment(path) {
 		return 0, nil
 	}
@@ -57,7 +67,7 @@ func GetPathSize(path string, includeHidden bool, recursive bool) (int64, error)
 
 			p := filepath.Join(path, entry.Name())
 
-			s, er := GetPathSize(p, includeHidden, recursive)
+			s, er := getSize(p, includeHidden, recursive)
 
 			if er != nil {
 				return 0, er
@@ -122,12 +132,12 @@ func FormatSize(size int64) string {
 
 func BuildOutput(size int64, path string, human bool) string {
 	if human {
-		return fmt.Sprintf("%s\t%s\n", FormatSize(size), path)
+		return FormatSize(size)
 	}
 
-	return fmt.Sprintf("%s\t%s\n", DefaultFormat(size), path)
+	return DefaultFormat(size)
 }
 
-func PrintSize(size int64, path string, human bool) {
-	fmt.Print(BuildOutput(size, path, human))
+func PrintSize(size string, path string) {
+	fmt.Printf("%s\t%s", size, path)
 }
