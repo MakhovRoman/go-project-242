@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-func GetPathSize(path string, includeHidden bool, recursive bool, human bool) (string, error) {
+func GetPathSize(path string, recursive, humanize, includeHidden bool) (string, error) {
 	s, err := getSize(path, includeHidden, recursive)
 
 	if err != nil {
 		return "", err
 	}
 
-	return BuildOutput(s, human), nil
+	return BuildOutput(s, humanize), nil
 }
 
-func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
+func getSize(path string, includeHidden, recursive bool) (int64, error) {
 	if !includeHidden && hasHiddenSegment(path) {
 		return 0, nil
 	}
@@ -81,7 +81,7 @@ func getSize(path string, includeHidden bool, recursive bool) (int64, error) {
 			total += s
 			continue
 		}
-
+		fmt.Println(entryInfo.Name())
 		total += entryInfo.Size()
 	}
 
@@ -116,14 +116,14 @@ func FormatSize(size int64) string {
 	}
 
 	if i == 0 {
-		return fmt.Sprintf("%dB", size)
+		return fmt.Sprintf("%d%s", size, units[i])
 	}
 
 	return fmt.Sprintf("%.1f%s", val, units[i])
 }
 
-func BuildOutput(size int64, human bool) string {
-	if human {
+func BuildOutput(size int64, humanize bool) string {
+	if humanize {
 		return FormatSize(size)
 	}
 

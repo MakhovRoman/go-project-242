@@ -98,7 +98,7 @@ func TestGetPathSize(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			path := getTestDataPath(tc.path)
 
-			got, err := GetPathSize(path, tc.includeHidden, tc.recursive, tc.humanize)
+			got, err := GetPathSize(path, tc.recursive, tc.humanize, tc.includeHidden)
 
 			if tc.wantErr {
 				if err == nil {
