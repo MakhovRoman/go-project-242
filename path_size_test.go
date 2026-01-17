@@ -133,7 +133,7 @@ func TestFormatSize(t *testing.T) {
 		tc := test
 
 		t.Run(tc.name, func(t *testing.T) {
-			got := FormatSize(tc.size)
+			got := formatSize(tc.size)
 			if tc.want != got {
 				t.Errorf("got %s, want %s", got, tc.want)
 			}
@@ -149,7 +149,7 @@ func TestBuildOutput(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BuildOutput(1_000_000, tc.humanize)
+			got := buildOutput(1_000_000, tc.humanize)
 
 			if got != tc.want {
 				t.Errorf("got %q, want %q", got, tc.want)

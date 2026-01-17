@@ -1,3 +1,4 @@
+// Package code provides utilities for calculating filesystem path sizes
 package code
 
 import (
@@ -7,6 +8,8 @@ import (
 	"strings"
 )
 
+// GetPathSize calculates the total size of a file or directory at the given path.
+// It supports optional recursive traversal, inclusion of hidden files and human-readable output formatting.
 func GetPathSize(path string, recursive, humanize, includeHidden bool) (string, error) {
 	s, err := getSize(path, includeHidden, recursive)
 
@@ -14,7 +17,7 @@ func GetPathSize(path string, recursive, humanize, includeHidden bool) (string, 
 		return "", err
 	}
 
-	return BuildOutput(s, humanize), nil
+	return buildOutput(s, humanize), nil
 }
 
 func getSize(path string, includeHidden, recursive bool) (int64, error) {
@@ -81,7 +84,7 @@ func getSize(path string, includeHidden, recursive bool) (int64, error) {
 			total += s
 			continue
 		}
-		fmt.Println(entryInfo.Name())
+
 		total += entryInfo.Size()
 	}
 
@@ -101,11 +104,11 @@ func hasHiddenSegment(path string) bool {
 	return false
 }
 
-func DefaultFormat(size int64) string {
+func defaultFormat(size int64) string {
 	return fmt.Sprintf("%dB", size)
 }
 
-func FormatSize(size int64) string {
+func formatSize(size int64) string {
 	val := float64(size)
 	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
 	i := 0
@@ -122,14 +125,10 @@ func FormatSize(size int64) string {
 	return fmt.Sprintf("%.1f%s", val, units[i])
 }
 
-func BuildOutput(size int64, humanize bool) string {
+func buildOutput(size int64, humanize bool) string {
 	if humanize {
-		return FormatSize(size)
+		return formatSize(size)
 	}
 
-	return DefaultFormat(size)
-}
-
-func PrintSize(size string, path string) {
-	fmt.Printf("%s\t%s\n", size, path)
+	return defaultFormat(size)
 }

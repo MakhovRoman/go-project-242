@@ -51,7 +51,7 @@ func main() {
 				return err
 			}
 
-			pathsize.PrintSize(size, path)
+			fmt.Printf("%s\t%s\n", size, path)
 
 			return nil
 		},
